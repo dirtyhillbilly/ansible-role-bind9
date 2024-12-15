@@ -26,7 +26,7 @@ $TTL {{ zone.default_ttl|default(zone.negative_ttl|default('3600')) }}   ; 1 hou
 {# We first deal in detail with SOA and NS, which are requiered, and root zone registers
    Empezamos detallando el SOA y NS, que son indispensables, y registros de raíz de zona #}
 {{ zone.name }} IN  SOA     {{ zone.primary|default(zone.ns_records.0) }}. {{ zone.admin|default(bind9_admin) }}. (
-                {{ zone.serial }} ; serial
+                {{ zone.serial|default(ansible_date_time.epoch) }} ; serial
                 {{ zone.refresh|default('14400') }} ; refresh (3 hours)
                 {{ zone.retry|default('3600') }} ; retry (1 hour)
                 {{ zone.expire|default('604800') }} ; expire (1 week)

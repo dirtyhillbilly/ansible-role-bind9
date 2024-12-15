@@ -24,9 +24,33 @@
         group: "{{ bind9_group }}"
         mode: 0644
 
+- name: Test extra zones existence
+  delegate_to: localhost
+  stat:
+    path: "{{ playbook_dir }}/host_vars/{{inventory_hostname}}/zones"
+  register: extra_zone_path
+  tags:
+    - role:bind9:zones
+
+- name: Load all extra zones
+  ansible.builtin.include_vars:
+    files_matching: "zone-.*.yml$"
+    dir: "{{ playbook_dir }}/host_vars/{{inventory_hostname}}/zones"
+    name: bind9_zones_extras_dict
+  when:
+    extra_zone_path.stat.exists
+  tags:
+    - role:bind9:zones
+
+- name: Load all extra zones
+  ansible.builtin.set_fact:
+    bind9_zones_extras: "{{ bind9_zones_extras_dict.values() }}"
+  when:
+    bind9_zones_extras_dict is defined
+
 - name: Create dynamic DNS keys
   ansible.builtin.include_tasks: create_ddns_keys.yml
-  loop: "{{ bind9_zones_static + bind9_zones_dynamic }}"
+  loop: "{{ bind9_zones_static + bind9_zones_dynamic + bind9_zones_extra }}"
   loop_control:
     label: "{{ item.name }}"
   when: bind9_generate_ddns_key | bool
@@ -119,7 +143,7 @@
     owner: "{{ bind9_user }}"
     group: "{{ bind9_group }}"
     mode: "0644"
-  loop: "{{ bind9_zones_static + bind9_zones_dynamic }}"
+  loop: "{{ bind9_zones_static + bind9_zones_dynamic + bind9_zones_extra }}"
   loop_control:
     label: "{{ item.name }}"
   when:
@@ -134,7 +158,7 @@
     owner: "{{ bind9_user }}"
     group: "{{ bind9_group }}"
     mode: "0600"
-  loop: "{{ bind9_zones_static + bind9_zones_dynamic }}"
+  loop: "{{ bind9_zones_static + bind9_zones_dynamic + bind9_zones_extra }}"
   loop_control:
     label: "{{ item.name }}"
   when:
@@ -222,7 +246,7 @@
     owner: root
     group: "{{ bind9_group }}"
     mode: "0644"
-  loop: "{{ bind9_zones_dynamic }}"
+  loop: "{{ bind9_zones_dynamic + bind9_zones_extra + bind9_zones_extra }}"
   loop_control:
     label: "{{ item.name }}"
   when:
