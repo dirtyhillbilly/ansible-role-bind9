@@ -22,7 +22,7 @@ Features:
 * set vars for your master server, for instance in `host_vars/master_name/vars/XX_bind.yml`, here with an example.com static zones and forwarder:
 ```yaml
 bind9_authoritative: yes
-bind9_zones_static: 
+bind9_zones_static:
 - { name: example.com , type=master }
 bind9_forward: yes
 bind9_forward_servers:
@@ -44,7 +44,7 @@ bind9_our_neighbors:
 * set vars for your slave servers:
 
 ```yaml
-bind9_zones_static: 
+bind9_zones_static:
 - { name: example.com, type: slave }
 bind9_forward: yes
 bind9_forward_servers:
@@ -87,7 +87,7 @@ zones_my_domains:
   retry: 2H
   expire: 1000H
   # NS and other pre-formatted records values must be given as full qualified domain names, with or without final dot, but not relative to the zone
-  primary: ns1.dyn_domain.org         # Optional, if you don't define it, firs NS is taken 
+  primary: ns1.dyn_domain.org         # Optional, if you don't define it, first NS is taken
   admin: postmaster.dyn_domain.org
   ns_records:
   - ns1.dyn_domain.org
@@ -153,7 +153,7 @@ For developing and testing the role we use Github Actions, Molecule and Vagrant.
 Run local tests with:
 
 ```
-molecule test 
+molecule test
 ```
 
 ## License
