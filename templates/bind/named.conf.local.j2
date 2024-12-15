@@ -44,8 +44,9 @@ zone "{{ zone.name }}" {
     notify yes;
 {%     endif %}
 {%     if (bind9_dnssec|default() or zone.dnssec|default()) and zone.dnssec|default(bind9_dnssec_zones_default_enabled) %}
-    auto-dnssec maintain;
+    dnssec-policy "systemli-standard";
     inline-signing yes;
+    serial-update-method increment;
 {%     endif %}
 {%     if zone.update_policy_grant|default() %}
     update-policy {
@@ -72,9 +73,9 @@ zone "{{ zone.name }}" {
 {%      if zone_type == 'forward' %}
     forwarders {
 {%         for fwd in zone.forwarders %}
-        {{ fwd }}; 
+        {{ fwd }};
 {%         endfor %}
-   }; 
+   };
 {%     endif %}
 {%   endif %}
 };

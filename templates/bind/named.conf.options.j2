@@ -53,6 +53,7 @@ options {
 	// Look here for DNSSEC keys
 	key-directory "{{ bind9_keydir }}";
 {% endif %}
+        version none;
 };
 
 {% if bind9_zones_static|selectattr('update_key_secret','defined')|list|default() %}
@@ -101,3 +102,11 @@ logging {
   {% endfor %}
 };
 {% endif %}
+
+dnssec-policy "systemli-standard" {
+    keys {
+        ksk lifetime P1Y algorithm 13;
+        zsk lifetime 60d algorithm 13;
+    };
+    nsec3param;
+}; // may occur multiple times
