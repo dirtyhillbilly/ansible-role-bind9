@@ -44,9 +44,11 @@
 
 - name: Load all extra zones
   ansible.builtin.set_fact:
-    bind9_zones_extras: "{{ bind9_zones_extras_dict.values() }}"
+    bind9_zones_extra: "{{ bind9_zones_extras_dict.values() }}"
   when:
     bind9_zones_extras_dict is defined
+  tags:
+    - role:bind9:zones
 
 - name: Create dynamic DNS keys
   ansible.builtin.include_tasks: create_ddns_keys.yml
