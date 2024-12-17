@@ -5,12 +5,15 @@
 // Consider adding the 1918 zones here, if they are not used in your
 // organization
 //include "/etc/bind/zones.rfc1918";
+{% if bind9_rndc_key %}
+include "/etc/bind/rndc.key";
+{% endif %}
 
 {% if bind9_masters|default() %}
 {%   for master in bind9_masters %}
 masters {{ master.name }} {
 {%     for addr in master.addresses %}
-    {{ addr }};
+    {{ addr }} {% if bind9_rndc_key %}key rndc-key{% endif %};
 {%     endfor %}
 };
 {%   endfor %}
@@ -19,7 +22,7 @@ masters {{ master.name }} {
 {%   for master in bind9_masters_extra %}
 masters {{ master.name }} {
 {%     for addr in master.addresses %}
-    {{ addr }};
+    {{ addr }} {% if bind9_rndc_key %}key rndc-key{% endif %};
 {%     endfor %}
 };
 {%   endfor %}
@@ -51,8 +54,12 @@ zone "{{ zone.name }}" {
 {%     if zone.update_policy_grant|default() %}
     update-policy {
         grant {{ zone.name }}_ddns_update {{ zone.update_policy_grant }};
-    };
+  };
 {%     endif %}
+{%     if bind9_rndc_key %}
+    allow-transfer { key "rndc-key"; };
+{%     endif %}
+
 {%   elif zone_type == 'slave' %}
     file "/var/lib/bind/db.{{ zone.name }}";
 {%     if zone.masters|default() or bind9_masters|default() %}
