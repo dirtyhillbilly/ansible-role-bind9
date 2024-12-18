@@ -169,21 +169,10 @@
     - item.update_keyfile | default()
 
 - name: Create dynamic bind9 zone files
-  ansible.builtin.template:
-    src: "{{ bind9_templates | default('') }}bind/zones/db.template.j2"
-    dest: "{{ bind9_zonedir }}/db.{{ item.name }}"
-    owner: root
-    group: "{{ bind9_group }}"
-    mode: "0644"
+  include_tasks: create_zone.yml
   loop: "{{ bind9_zones_dynamic + bind9_zones_extra + bind9_zones_extra }}"
   loop_control:
     label: "{{ item.name }}"
-  when:
-    - bind9_authoritative | default()
-    - item.type | default(bind9_zone_type) == 'master'
-  notify:
-    - Zone file change
-    - Reload bind9
   tags:
     - role:bind9:zones
 

@@ -1,0 +1,23 @@
+---
+- name: Create bind9 zone file
+  block:
+    - name: Create zone file from template
+      ansible.builtin.template:
+        src: "{{ bind9_templates | default('') }}bind/zones/db.template.j2"
+        dest: "{{ bind9_zonedir }}/db.{{ item.name }}"
+        owner: root
+        group: "{{ bind9_group }}"
+        mode: "0644"
+        validate: "/usr/local/bin/diff-bind9-zone %s {{ bind9_zonedir }}/db.{{ item.name }}"
+  rescue:
+    - name: Ignore failure message
+      debug:
+        msg: "Zone {{ item.name}} is unchanged - ignore previous message"
+  when:
+    - bind9_authoritative | default()
+    - item.type | default(bind9_zone_type) == 'master'
+  notify:
+    - Zone file change
+    - Reload bind9
+  tags:
+    - role:bind9:zones
